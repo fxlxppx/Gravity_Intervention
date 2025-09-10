@@ -12,9 +12,14 @@ public class PlayerControl : MonoBehaviour
     private float moveInput;
 
     [Header("Gravidade")]
-    public float invertedGravityTime = 3f; // tempo limite
+    public float normalGravity = 10f;       // mais forte para baixo
+    public float invertedGravity = -0.5f;   // menos forte para cima
+    public float invertedGravityTime = 3f;  // tempo que fica invertida
+    public float gravityCooldown = 5f;      // cooldown entre flips
+
     private bool isGravityInverted = false;
     private float gravityTimer = 0f;
+    private float cooldownTimer = 0f;
 
     void Awake()
     {
@@ -31,6 +36,12 @@ public class PlayerControl : MonoBehaviour
 
     void OnEnable() => controls.Enable();
     void OnDisable() => controls.Disable();
+
+    void Start()
+    {
+        // aplica gravidade inicial
+        rb.gravityScale = normalGravity;
+    }
 
     void FixedUpdate()
     {
@@ -52,14 +63,24 @@ public class PlayerControl : MonoBehaviour
                 ResetGravity();
             }
         }
+
+        // Atualiza cooldown
+        if (cooldownTimer > 0)
+        {
+            cooldownTimer -= Time.fixedDeltaTime;
+        }
     }
 
     private void FlipGravity()
     {
+        // se ainda está em cooldown, não faz nada
+        if (cooldownTimer > 0f) return;
+
         if (!isGravityInverted)
         {
-            // Ativa gravidade invertida
-            rb.gravityScale *= -1;
+            // Ativa gravidade invertida (para cima)
+            rb.gravityScale = invertedGravity;
+
             Vector3 scale = transform.localScale;
             scale.y *= -1;
             transform.localScale = scale;
@@ -72,11 +93,15 @@ public class PlayerControl : MonoBehaviour
             // Se já está invertido e apertar de novo → volta ao normal antes do tempo
             ResetGravity();
         }
+
+        // inicia cooldown
+        cooldownTimer = gravityCooldown;
     }
 
     private void ResetGravity()
     {
-        rb.gravityScale = Mathf.Abs(rb.gravityScale); // garante positivo
+        rb.gravityScale = normalGravity; // força maior para baixo
+
         Vector3 scale = transform.localScale;
         scale.y = Mathf.Abs(scale.y); // garante positivo
         transform.localScale = scale;
