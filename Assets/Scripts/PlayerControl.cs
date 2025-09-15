@@ -3,8 +3,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerControl : MonoBehaviour
 {
+    public static PlayerControl Instance { get; private set; }
+
     [Header("Movimento")]
-    public float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 5f;
     private Rigidbody2D rb;
     private SpriteRenderer spriteRenderer;
     private InputSystem_Actions controls;
@@ -12,10 +14,10 @@ public class PlayerControl : MonoBehaviour
     private float moveInput;
 
     [Header("Gravidade")]
-    public float normalGravity = 10f;       // mais forte para baixo
-    public float invertedGravity = -0.5f;   // menos forte para cima
-    public float invertedGravityTime = 3f;  // tempo que fica invertida
-    public float gravityCooldown = 5f;      // cooldown entre flips
+    [SerializeField] private float normalGravity = 10f;       // mais forte para baixo
+    [SerializeField] private float invertedGravity = -0.5f;   // menos forte para cima
+    [SerializeField] private float invertedGravityTime = 3f;  // tempo que fica invertida
+    [SerializeField] private float gravityCooldown = 5f;      // cooldown entre flips
 
     private bool isGravityInverted = false;
     private float gravityTimer = 0f;
@@ -23,6 +25,10 @@ public class PlayerControl : MonoBehaviour
 
     void Awake()
     {
+        // Singleton para ser acessado pela pedra
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
@@ -108,5 +114,11 @@ public class PlayerControl : MonoBehaviour
 
         isGravityInverted = false;
         gravityTimer = 0f;
+    }
+
+    // Getter para a pedra acessar
+    public bool IsGravityInverted()
+    {
+        return isGravityInverted;
     }
 }
