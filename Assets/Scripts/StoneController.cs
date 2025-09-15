@@ -5,8 +5,8 @@ public class PushableStone : MonoBehaviour
     private Rigidbody2D rb;
 
     [Header("Gravidade")]
-    public float normalGravity = 10f;
-    public float invertedGravity = -0.5f;
+    [SerializeField] private float normalGravity = 10f;
+    [SerializeField] private float invertedGravity = -0.5f;
 
     private bool isGravityInverted = false;
     private bool playerInsideTrigger = false;

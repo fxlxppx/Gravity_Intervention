@@ -79,12 +79,10 @@ public class PlayerControl : MonoBehaviour
 
     private void FlipGravity()
     {
-        // se ainda está em cooldown, não faz nada
         if (cooldownTimer > 0f) return;
 
         if (!isGravityInverted)
         {
-            // Ativa gravidade invertida (para cima)
             rb.gravityScale = invertedGravity;
 
             Vector3 scale = transform.localScale;
@@ -96,11 +94,9 @@ public class PlayerControl : MonoBehaviour
         }
         else
         {
-            // Se já está invertido e apertar de novo → volta ao normal antes do tempo
             ResetGravity();
         }
 
-        // inicia cooldown
         cooldownTimer = gravityCooldown;
     }
 
@@ -116,7 +112,7 @@ public class PlayerControl : MonoBehaviour
         gravityTimer = 0f;
     }
 
-    // Getter para a pedra acessar
+    // Getter para acessar onde necessário via instancia (PlayerControl.Instance)
     public bool IsGravityInverted()
     {
         return isGravityInverted;
