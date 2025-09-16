@@ -6,15 +6,22 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Collider2D))]
 public class ButtonController2D : MonoBehaviour
 {
+    public enum ButtonMode
+    {
+        Hold,
+        Toggle,
+        Latch
+    }
+
     [Header("Config")]
     public DoorColorEnum color = DoorColorEnum.Red;
-    [Tooltip("Layers que podem ativar o botão (Player, Stone etc.)")]
     public LayerMask activatorLayers;
-    [Tooltip("Se true o botão permanece pressionado até o objeto sair; se false, botão é momentâneo (não recomendado para pushable stones)")]
-    public bool holdWhileObjectOnTop = true;
+
+    [Tooltip("Modo de funcionamento do botão")]
+    public ButtonMode buttonMode = ButtonMode.Hold;
 
     [Header("Visual / Feedback")]
-    public Transform visualRoot; // objeto visual que pode 'afundar' ao pressionar
+    public Transform visualRoot;
     public float pressDepth = 0.08f;
     public float animationTime = 0.08f;
     public UnityEvent onPressed;
@@ -31,16 +38,6 @@ public class ButtonController2D : MonoBehaviour
         visualClosedLocalPos = visualRoot.localPosition;
     }
 
-    private void Start()
-    {
-        // Garantir que o collider é trigger (recomendado)
-        var col = GetComponent<Collider2D>();
-        if (!col.isTrigger)
-        {
-            Debug.LogWarning($"[ButtonController2D] Collider on {name} is not set to Trigger. Recommended to use a Trigger collider for detection.");
-        }
-    }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GameObject root = GetRootObjectFromCollider(collision);
@@ -48,7 +45,7 @@ public class ButtonController2D : MonoBehaviour
 
         if (activators.Add(root))
         {
-            UpdatePressedState();
+            HandlePress();
         }
     }
 
@@ -59,31 +56,43 @@ public class ButtonController2D : MonoBehaviour
 
         if (activators.Remove(root))
         {
-            UpdatePressedState();
+            HandleRelease();
         }
     }
 
-    private GameObject GetRootObjectFromCollider(Collider2D col)
+    private void HandlePress()
     {
-        if (col.attachedRigidbody != null)
-            return col.attachedRigidbody.gameObject;
-        return col.gameObject;
+        switch (buttonMode)
+        {
+            case ButtonMode.Hold:
+                UpdatePressedState(true);
+                break;
+
+            case ButtonMode.Toggle:
+                UpdatePressedState(!isPressed); // alterna estado
+                break;
+
+            case ButtonMode.Latch:
+                if (!isPressed) UpdatePressedState(true); // só ativa uma vez
+                break;
+        }
     }
 
-    private bool IsActivator(GameObject go)
+    private void HandleRelease()
     {
-        return (activatorLayers.value & (1 << go.layer)) != 0;
+        if (buttonMode == ButtonMode.Hold)
+        {
+            if (activators.Count == 0)
+                UpdatePressedState(false);
+        }
+        // Toggle e Latch não fazem nada no Release
     }
 
-    private void UpdatePressedState()
+    private void UpdatePressedState(bool state)
     {
-        bool shouldBePressed = activators.Count > 0;
+        if (state == isPressed) return;
 
-        if (shouldBePressed == isPressed) return;
-
-        isPressed = shouldBePressed;
-
-        // Reporta ao sistema central
+        isPressed = state;
         ButtonSystem.ReportButtonState(color, isPressed);
 
         if (isPressed)
@@ -110,6 +119,18 @@ public class ButtonController2D : MonoBehaviour
             yield return null;
         }
         visualRoot.localPosition = to;
+    }
+
+    private GameObject GetRootObjectFromCollider(Collider2D col)
+    {
+        if (col.attachedRigidbody != null)
+            return col.attachedRigidbody.gameObject;
+        return col.gameObject;
+    }
+
+    private bool IsActivator(GameObject go)
+    {
+        return (activatorLayers.value & (1 << go.layer)) != 0;
     }
 
 #if UNITY_EDITOR
