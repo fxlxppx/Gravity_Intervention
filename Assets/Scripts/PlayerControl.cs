@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerControl : MonoBehaviour
 {
     public static PlayerControl Instance { get; private set; }
+    public static event System.Action OnPlayerDied;
 
     [Header("Movimento")]
     [SerializeField] private float moveSpeed = 5f;
@@ -25,7 +26,6 @@ public class PlayerControl : MonoBehaviour
 
     void Awake()
     {
-        // Singleton para ser acessado pela pedra
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
@@ -45,22 +45,18 @@ public class PlayerControl : MonoBehaviour
 
     void Start()
     {
-        // aplica gravidade inicial
         rb.gravityScale = normalGravity;
     }
 
     void FixedUpdate()
     {
-        // Movimento horizontal
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
 
-        // Flip do sprite
         if (moveInput > 0.1f)
             spriteRenderer.flipX = false;
         else if (moveInput < -0.1f)
             spriteRenderer.flipX = true;
 
-        // Timer da gravidade invertida
         if (isGravityInverted)
         {
             gravityTimer -= Time.fixedDeltaTime;
@@ -70,7 +66,6 @@ public class PlayerControl : MonoBehaviour
             }
         }
 
-        // Atualiza cooldown
         if (cooldownTimer > 0)
         {
             cooldownTimer -= Time.fixedDeltaTime;
@@ -102,19 +97,42 @@ public class PlayerControl : MonoBehaviour
 
     private void ResetGravity()
     {
-        rb.gravityScale = normalGravity; // força maior para baixo
+        rb.gravityScale = normalGravity;
 
         Vector3 scale = transform.localScale;
-        scale.y = Mathf.Abs(scale.y); // garante positivo
+        scale.y = Mathf.Abs(scale.y);
         transform.localScale = scale;
 
         isGravityInverted = false;
         gravityTimer = 0f;
     }
-
-    // Getter para acessar onde necessário via instancia (PlayerControl.Instance)
     public bool IsGravityInverted()
     {
         return isGravityInverted;
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Die();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        Debug.Log("Player morreu!");
+
+        OnPlayerDied?.Invoke();
+
+        Destroy(gameObject);
     }
 }

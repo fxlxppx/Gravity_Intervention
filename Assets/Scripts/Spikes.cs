@@ -1,17 +1,18 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Spikes : MonoBehaviour
 {
-    void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Jogador morreu nos espinhos! Reiniciando cena...");
+            Debug.Log("Jogador tocou nos espinhos!");
 
-            // Pega a cena atual pelo nome e recarrega
-            Scene currentScene = SceneManager.GetActiveScene();
-            SceneManager.LoadScene(currentScene.name);
+            PlayerControl player = other.GetComponent<PlayerControl>();
+            if (player != null)
+            {
+                player.SendMessage("Die");
+            }
         }
     }
 }

@@ -27,7 +27,6 @@ public class ButtonController2D : MonoBehaviour
     public UnityEvent onPressed;
     public UnityEvent onReleased;
 
-    // estado interno
     private HashSet<GameObject> activators = new HashSet<GameObject>();
     private bool isPressed = false;
     private Vector3 visualClosedLocalPos;
@@ -85,7 +84,6 @@ public class ButtonController2D : MonoBehaviour
             if (activators.Count == 0)
                 UpdatePressedState(false);
         }
-        // Toggle e Latch não fazem nada no Release
     }
 
     private void UpdatePressedState(bool state)
