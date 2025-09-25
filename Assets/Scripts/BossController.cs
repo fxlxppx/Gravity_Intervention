@@ -5,8 +5,8 @@ public class BossController : MonoBehaviour
 {
     [Header("Patrulha")]
     public float moveSpeed = 3f;
-    public Transform[] waypointObjects; // arraste aqui os filhos no Inspector
-    private Vector2[] waypoints;        // cópia das posições fixas
+    public Transform[] waypointObjects;
+    private Vector2[] waypoints;
     private int currentWaypoint = 0;
 
     [Header("Ataque")]
@@ -17,14 +17,18 @@ public class BossController : MonoBehaviour
 
     private bool isAttacking = false;
 
+    [Header("Vida do Boss")]
+    public float maxHealth = 10f;
+    private float currentHealth;
+
     private void Start()
     {
-        // copia as posições dos waypoints em espaço de mundo
         waypoints = new Vector2[waypointObjects.Length];
         for (int i = 0; i < waypointObjects.Length; i++)
         {
             waypoints[i] = waypointObjects[i].position;
         }
+        currentHealth = maxHealth;
     }
 
     private void Update()
@@ -65,7 +69,7 @@ public class BossController : MonoBehaviour
 
     private void ShootBlob()
     {
-        Vector3 spawnPos = transform.position + Vector3.up * 1f; // 1 unidade acima do Boss
+        Vector3 spawnPos = transform.position + Vector3.up * 1f;
         GameObject blob = Instantiate(blobPrefab, spawnPos, Quaternion.identity);
 
         Rigidbody2D rb = blob.GetComponent<Rigidbody2D>();
@@ -75,5 +79,20 @@ public class BossController : MonoBehaviour
             rb.AddForce(direction * blobForce, ForceMode2D.Impulse);
         }
     }
+    public void TakeDamage(float amount)
+    {
+        currentHealth -= amount;
+        Debug.Log($"Boss tomou {amount} de dano! Vida restante: {currentHealth}");
 
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        Debug.Log("Boss derrotado!");
+        Destroy(gameObject);
+    }
 }

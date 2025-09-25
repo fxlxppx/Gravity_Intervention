@@ -34,7 +34,6 @@ public class BlobProjectile : MonoBehaviour
         if (collision.gameObject.CompareTag("Blobs")) return;
 
         bounceCount++;
-        Debug.Log("Blob ricocheteou! " + bounceCount);
 
         if (bounceCount >= maxBounces)
         {
