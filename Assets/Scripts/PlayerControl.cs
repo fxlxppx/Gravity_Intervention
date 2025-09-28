@@ -15,10 +15,10 @@ public class PlayerControl : MonoBehaviour
     private float moveInput;
 
     [Header("Gravidade")]
-    [SerializeField] private float normalGravity = 10f;       // mais forte para baixo
-    [SerializeField] private float invertedGravity = -0.5f;   // menos forte para cima
-    [SerializeField] private float invertedGravityTime = 3f;  // tempo que fica invertida
-    [SerializeField] private float gravityCooldown = 5f;      // cooldown entre flips
+    [SerializeField] private float normalGravity = 10f;
+    [SerializeField] private float invertedGravity = -0.5f;
+    [SerializeField] private float invertedGravityTime = 3f;
+    [SerializeField] private float gravityCooldown = 5f;
 
     private bool isGravityInverted = false;
     private float gravityTimer = 0f;
@@ -86,12 +86,16 @@ public class PlayerControl : MonoBehaviour
 
             isGravityInverted = true;
             gravityTimer = invertedGravityTime;
+
+            if (CooldownUI.Instance != null)
+            {
+                CooldownUI.Instance.StartCooldown(gravityCooldown);
+            }
         }
         else
         {
             ResetGravity();
         }
-
         cooldownTimer = gravityCooldown;
     }
 
@@ -105,6 +109,11 @@ public class PlayerControl : MonoBehaviour
 
         isGravityInverted = false;
         gravityTimer = 0f;
+
+        if (CooldownUI.Instance != null)
+        {
+            CooldownUI.Instance.FinishCooldown();
+        }
     }
     public bool IsGravityInverted()
     {
