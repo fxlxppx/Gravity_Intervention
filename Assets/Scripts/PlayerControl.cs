@@ -41,7 +41,6 @@ public class PlayerControl : MonoBehaviour
     }
 
     void OnEnable() => controls.Enable();
-    void OnDisable() => controls.Disable();
 
     void Start()
     {
