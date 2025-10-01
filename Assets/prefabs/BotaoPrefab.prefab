@@ -153,8 +153,8 @@ MonoBehaviour:
   color: 0
   activatorLayers:
     serializedVersion: 2
-    m_Bits: 72
-  holdWhileObjectOnTop: 1
+    m_Bits: 0
+  buttonMode: 0
   visualRoot: {fileID: 0}
   pressDepth: 0.08
   animationTime: 0.08
