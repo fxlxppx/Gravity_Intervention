@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections; // precisa para usar IEnumerator
 
 public class PlayerControl : MonoBehaviour
 {
@@ -24,6 +25,16 @@ public class PlayerControl : MonoBehaviour
     private float gravityTimer = 0f;
     private float cooldownTimer = 0f;
 
+    [Header("Vida do Player")]
+    [SerializeField] private int maxLives = 3;
+    private int currentLives;
+    [SerializeField] private UIHearts uiHearts;
+
+    [Header("Invulnerabilidade")]
+    [SerializeField] private float invulnerabilityDuration = 2f;
+    [SerializeField] private float blinkInterval = 0.2f;
+    private bool isInvulnerable = false;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -43,15 +54,17 @@ public class PlayerControl : MonoBehaviour
     void OnEnable()
     {
         controls.Enable();
-        CheckpointManager.OnPlayerRespawn+= ResetGravity;
+        CheckpointManager.OnPlayerRespawn += ResetGravity;
         CheckpointManager.OnPlayerRespawn += ResetPlayer;
-
-
     }
 
     void Start()
     {
         rb.gravityScale = normalGravity;
+        currentLives = maxLives;
+
+        if (uiHearts != null)
+            uiHearts.UpdateHearts(currentLives);
     }
 
     void FixedUpdate()
@@ -121,6 +134,7 @@ public class PlayerControl : MonoBehaviour
             CooldownUI.Instance.FinishCooldown();
         }
     }
+
     public bool IsGravityInverted()
     {
         return isGravityInverted;
@@ -128,28 +142,68 @@ public class PlayerControl : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs"))
+        if (!isInvulnerable && (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs")))
         {
-            Die();
+            TakeDamage();
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs"))
+        if (!isInvulnerable && (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs")))
         {
-            Die();
+            TakeDamage();
         }
     }
 
     private void ResetPlayer()
     {
         gameObject.SetActive(true);
+        currentLives = maxLives;
+        isInvulnerable = false;
+
+        if (uiHearts != null)
+            uiHearts.UpdateHearts(currentLives);
     }
+
+    private void TakeDamage()
+    {
+        currentLives--;
+        Debug.Log("Player tomou dano! Vidas restantes: " + currentLives);
+
+        if (uiHearts != null)
+            uiHearts.UpdateHearts(currentLives);
+
+        if (currentLives <= 0)
+        {
+            Die();
+        }
+        else
+        {
+            StartCoroutine(InvulnerabilityRoutine());
+        }
+    }
+
     private void Die()
     {
-        Debug.Log("Player morreu!");
+        Debug.Log("Player morreu sem vidas!");
         gameObject.SetActive(false);
         OnPlayerDied?.Invoke();
+    }
+
+    private IEnumerator InvulnerabilityRoutine()
+    {
+        isInvulnerable = true;
+
+        float elapsed = 0f;
+        while (elapsed < invulnerabilityDuration)
+        {
+            spriteRenderer.enabled = !spriteRenderer.enabled;
+            yield return new WaitForSeconds(blinkInterval);
+            elapsed += blinkInterval;
+        }
+
+        spriteRenderer.enabled = true;
+        isInvulnerable = false;
     }
 }
