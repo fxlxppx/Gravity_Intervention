@@ -40,7 +40,14 @@ public class PlayerControl : MonoBehaviour
         controls.Player.flip_gravity.performed += ctx => FlipGravity();
     }
 
-    void OnEnable() => controls.Enable();
+    void OnEnable()
+    {
+        controls.Enable();
+        CheckpointManager.OnPlayerRespawn+= ResetGravity;
+        CheckpointManager.OnPlayerRespawn += ResetPlayer;
+
+
+    }
 
     void Start()
     {
@@ -135,12 +142,14 @@ public class PlayerControl : MonoBehaviour
         }
     }
 
+    private void ResetPlayer()
+    {
+        gameObject.SetActive(true);
+    }
     private void Die()
     {
         Debug.Log("Player morreu!");
-
+        gameObject.SetActive(false);
         OnPlayerDied?.Invoke();
-
-        Destroy(gameObject);
     }
 }
