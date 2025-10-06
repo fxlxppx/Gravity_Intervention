@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,7 +17,7 @@ public class ButtonController2D : MonoBehaviour
     public DoorColorEnum color = DoorColorEnum.Red;
     public LayerMask activatorLayers;
 
-    [Tooltip("Modo de funcionamento do botão")]
+    [Tooltip("Modo de funcionamento do botÃ£o")]
     public ButtonMode buttonMode = ButtonMode.Hold;
 
     [Header("Visual / Feedback")]
@@ -35,6 +35,16 @@ public class ButtonController2D : MonoBehaviour
     {
         if (visualRoot == null) visualRoot = transform;
         visualClosedLocalPos = visualRoot.localPosition;
+    }
+
+    private void OnEnable()
+    {
+        CheckpointManager.OnPlayerRespawn += ResetToInitialState;
+    }
+
+    private void OnDisable()
+    {
+        CheckpointManager.OnPlayerRespawn -= ResetToInitialState;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -68,11 +78,11 @@ public class ButtonController2D : MonoBehaviour
                 break;
 
             case ButtonMode.Toggle:
-                UpdatePressedState(!isPressed); // alterna estado
+                UpdatePressedState(!isPressed);
                 break;
 
             case ButtonMode.Latch:
-                if (!isPressed) UpdatePressedState(true); // só ativa uma vez
+                if (!isPressed) UpdatePressedState(true);
                 break;
         }
     }
@@ -129,6 +139,21 @@ public class ButtonController2D : MonoBehaviour
     private bool IsActivator(GameObject go)
     {
         return (activatorLayers.value & (1 << go.layer)) != 0;
+    }
+
+    public void ResetToInitialState()
+    {
+        activators.Clear();
+
+        if (isPressed)
+        {
+            isPressed = false;
+            ButtonSystem.ReportButtonState(color, false);
+            onReleased?.Invoke();
+        }
+
+        if (visualRoot != null)
+            visualRoot.localPosition = visualClosedLocalPos;
     }
 
 #if UNITY_EDITOR

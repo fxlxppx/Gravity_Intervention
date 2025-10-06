@@ -1,8 +1,9 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PushableStone : MonoBehaviour
 {
     private Rigidbody2D rb;
+    private Vector3 initialPosition;
 
     [Header("Gravidade")]
     [SerializeField] private float normalGravity = 10f;
@@ -19,6 +20,14 @@ public class PushableStone : MonoBehaviour
     private void Start()
     {
         rb.gravityScale = normalGravity;
+        initialPosition = transform.position;
+
+        CheckpointManager.OnPlayerRespawn += ResetToInitialPosition;
+    }
+
+    private void OnDestroy()
+    {
+        CheckpointManager.OnPlayerRespawn -= ResetToInitialPosition;
     }
 
     private void Update()
@@ -41,23 +50,28 @@ public class PushableStone : MonoBehaviour
     private void ApplyInvertedGravity()
     {
         rb.gravityScale = invertedGravity;
-
         Vector3 scale = transform.localScale;
         scale.y = -Mathf.Abs(scale.y);
         transform.localScale = scale;
-
         isGravityInverted = true;
     }
 
     private void ResetGravity()
     {
         rb.gravityScale = normalGravity;
-
         Vector3 scale = transform.localScale;
         scale.y = Mathf.Abs(scale.y);
         transform.localScale = scale;
-
         isGravityInverted = false;
+    }
+
+    private void ResetToInitialPosition()
+    {
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        transform.position = initialPosition;
+
+        ResetGravity();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

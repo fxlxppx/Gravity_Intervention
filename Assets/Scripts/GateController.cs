@@ -31,37 +31,31 @@ public class GateController2D : MonoBehaviour
     private void Awake()
     {
         closedLocalPos = transform.localPosition;
-        if (blockingCollider == null) blockingCollider = GetComponent<Collider2D>();
+        if (blockingCollider == null)
+            blockingCollider = GetComponent<Collider2D>();
     }
 
     private void OnEnable()
     {
         ButtonSystem.OnButtonPressedCountChanged += OnColorCountChanged;
+        CheckpointManager.OnPlayerRespawn += ResetToInitialState;
     }
 
     private void OnDisable()
     {
         ButtonSystem.OnButtonPressedCountChanged -= OnColorCountChanged;
+        CheckpointManager.OnPlayerRespawn -= ResetToInitialState;
     }
 
     private void Start()
     {
         int initialCount = ButtonSystem.GetPressedCount(color);
-
-        if (initialCount >= requiredButtonsToOpen)
-        {
-            ApplyState(true);
-        }
-        else
-        {
-            ApplyState(false);
-        }
+        ApplyState(initialCount >= requiredButtonsToOpen);
     }
 
     private void OnColorCountChanged(DoorColorEnum changedColor, int pressedCount)
     {
         if (changedColor != color) return;
-
         if (behavior == GateBehavior.StayOpen && permanentlyOpen) return;
 
         bool shouldOpen = pressedCount >= requiredButtonsToOpen;
@@ -77,12 +71,9 @@ public class GateController2D : MonoBehaviour
                 }
                 ApplyState(true);
             }
-            else
+            else if (isOpen && autoCloseRoutine == null)
             {
-                if (isOpen && autoCloseRoutine == null)
-                {
-                    autoCloseRoutine = StartCoroutine(AutoCloseAfterDelay(autoCloseDelay));
-                }
+                autoCloseRoutine = StartCoroutine(AutoCloseAfterDelay(autoCloseDelay));
             }
         }
         else
@@ -94,11 +85,10 @@ public class GateController2D : MonoBehaviour
     private void ApplyState(bool open)
     {
         if (open == isOpen) return;
+
         isOpen = open;
         if (isOpen && behavior == GateBehavior.StayOpen)
-        {
             permanentlyOpen = true;
-        }
 
         if (useAnimator && animator != null)
         {
@@ -111,16 +101,12 @@ public class GateController2D : MonoBehaviour
         }
 
         if (disableColliderWhenOpen && blockingCollider != null)
-        {
             blockingCollider.enabled = !isOpen;
-        }
     }
 
     private IEnumerator AutoCloseAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-
-        // só fecha se ainda for esse comportamento e o portão não for permanentemente aberto
         if (behavior == GateBehavior.AutoCloseTimer && !permanentlyOpen)
         {
             autoCloseRoutine = null;
@@ -139,5 +125,31 @@ public class GateController2D : MonoBehaviour
             yield return null;
         }
         transform.localPosition = targetLocalPos;
+    }
+
+    private void ResetToInitialState()
+    {
+        if (autoCloseRoutine != null)
+        {
+            StopCoroutine(autoCloseRoutine);
+            autoCloseRoutine = null;
+        }
+
+        isOpen = false;
+        permanentlyOpen = false;
+
+        if (useAnimator && animator != null)
+        {
+            animator.SetBool("Open", false);
+        }
+        else
+        {
+            transform.localPosition = closedLocalPos;
+        }
+
+        if (blockingCollider != null)
+            blockingCollider.enabled = true;
+
+        Debug.Log($"GateController2D ({color}): Resetado ao estado inicial.");
     }
 }

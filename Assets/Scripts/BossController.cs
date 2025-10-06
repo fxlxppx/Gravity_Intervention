@@ -91,5 +91,6 @@ public class BossController : MonoBehaviour
     private void Die()
     {
         Destroy(gameObject);
+        ButtonSystem.ReportButtonState(DoorColorEnum.Black, true);
     }
 }

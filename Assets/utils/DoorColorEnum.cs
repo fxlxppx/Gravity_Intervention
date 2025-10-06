@@ -9,4 +9,5 @@ public enum DoorColorEnum
     Gray,
     Purple,
     Orange,
+    Black
 }

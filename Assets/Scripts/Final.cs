@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Final : MonoBehaviour
 {
@@ -6,11 +7,7 @@ public class Final : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Jogador chegou no final!");
-            Application.Quit(); // fecha no jogo compilado
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false; // fecha dentro do editor
-#endif
+            SceneManager.LoadScene(2);
         }
     }
 }
