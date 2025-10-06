@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections; // precisa para usar IEnumerator
+using System.Collections;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -33,7 +33,7 @@ public class PlayerControl : MonoBehaviour
     [Header("Invulnerabilidade")]
     [SerializeField] private float invulnerabilityDuration = 2f;
     [SerializeField] private float blinkInterval = 0.2f;
-    private bool isInvulnerable = false;
+    [SerializeField] private bool isInvulnerable = false;
 
     void Awake()
     {
@@ -142,17 +142,23 @@ public class PlayerControl : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!isInvulnerable && (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs")))
+        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs"))
         {
-            TakeDamage();
+            if (!isInvulnerable)
+                TakeDamage();
+            else
+                return;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!isInvulnerable && (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs")))
+        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs"))
         {
-            TakeDamage();
+            if (!isInvulnerable)
+                TakeDamage();
+            else
+                return;
         }
     }
 
@@ -195,6 +201,9 @@ public class PlayerControl : MonoBehaviour
     {
         isInvulnerable = true;
 
+        int originalLayer = LayerMask.NameToLayer("Default");
+        gameObject.layer = LayerMask.NameToLayer("Invulnerable");
+
         float elapsed = 0f;
         while (elapsed < invulnerabilityDuration)
         {
@@ -205,5 +214,7 @@ public class PlayerControl : MonoBehaviour
 
         spriteRenderer.enabled = true;
         isInvulnerable = false;
+        gameObject.layer = originalLayer;
     }
+
 }

@@ -7,6 +7,7 @@ public class CheckpointManager : MonoBehaviour
     private Checkpoint currentCheckpoint;
     public static event System.Action OnPlayerRespawn;
 
+    [SerializeField] private Checkpoint defaultCheckpoint;
     [SerializeField] private Transform playerTransform;
 
     private void Awake()
@@ -25,13 +26,9 @@ public class CheckpointManager : MonoBehaviour
         PlayerControl.OnPlayerDied -= RespawnPlayer;
     }
 
-    private void Update()
+    private void Start()
     {
-        if (Keyboard.current.rKey.wasPressedThisFrame)
-        {
-            Debug.Log("Respawn manual pelo R");
-            RespawnPlayer();
-        }
+        currentCheckpoint = defaultCheckpoint;
     }
 
     public void SetCheckpoint(Checkpoint checkpoint)

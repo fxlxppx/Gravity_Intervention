@@ -56,7 +56,6 @@ public class BossController : MonoBehaviour
     private IEnumerator AttackAtWaypoint()
     {
         isAttacking = true;
-        Debug.Log("Boss atacando!");
 
         for (int i = 0; i < blobsPerAttack; i++)
         {
@@ -82,7 +81,6 @@ public class BossController : MonoBehaviour
     public void TakeDamage(float amount)
     {
         currentHealth -= amount;
-        Debug.Log($"Boss tomou {amount} de dano! Vida restante: {currentHealth}");
 
         if (currentHealth <= 0)
         {
@@ -92,7 +90,6 @@ public class BossController : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("Boss derrotado!");
         Destroy(gameObject);
     }
 }

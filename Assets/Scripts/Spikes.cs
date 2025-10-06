@@ -11,7 +11,7 @@ public class Spikes : MonoBehaviour
             PlayerControl player = other.GetComponent<PlayerControl>();
             if (player != null)
             {
-                player.SendMessage("Die");
+                player.SendMessage("TakeDamage");
             }
         }
     }

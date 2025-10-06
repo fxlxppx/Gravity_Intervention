@@ -14,15 +14,15 @@ public class GameManager : MonoBehaviour
 
     private void HandlePlayerDeath()
     {
-        Debug.Log("GameManager: O Player morreu, respawnando...");
+        Debug.Log("GameManager: Player morreu — mostrando menu de morte.");
 
-        if (CheckpointManager.Instance != null)
+        if (DeathMenuUI.Instance != null)
         {
-            CheckpointManager.Instance.RespawnPlayer();
+            DeathMenuUI.Instance.Show();
         }
         else
         {
-            Debug.LogWarning("Nenhum CheckpointManager encontrado. Reiniciando cena como fallback.");
+            Debug.LogWarning("DeathMenuUI não encontrado. Reiniciando cena como fallback.");
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex
             );
