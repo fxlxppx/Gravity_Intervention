@@ -6,6 +6,9 @@ public class PlayerControl : MonoBehaviour
 {
     public static PlayerControl Instance { get; private set; }
     public static event System.Action OnPlayerDied;
+    public static event System.Action<float> OnGravityInverted;
+    public static event System.Action OnGravityReset;
+    public static event System.Action OnGravityReady;
 
     [Header("Movimento")]
     [SerializeField] private float moveSpeed = 5f;
@@ -88,6 +91,11 @@ public class PlayerControl : MonoBehaviour
         if (cooldownTimer > 0)
         {
             cooldownTimer -= Time.fixedDeltaTime;
+            if (cooldownTimer <= 0)
+            {
+                cooldownTimer = 0;
+                OnGravityReady?.Invoke();
+            }
         }
     }
 
@@ -105,6 +113,7 @@ public class PlayerControl : MonoBehaviour
 
             isGravityInverted = true;
             gravityTimer = invertedGravityTime;
+            OnGravityInverted?.Invoke(invertedGravityTime);
 
             if (CooldownUI.Instance != null)
             {
@@ -128,10 +137,15 @@ public class PlayerControl : MonoBehaviour
 
         isGravityInverted = false;
         gravityTimer = 0f;
+        OnGravityReset?.Invoke();
 
         if (CooldownUI.Instance != null)
         {
             CooldownUI.Instance.FinishCooldown();
+        }
+        if (cooldownTimer <= 0f)
+        {
+            OnGravityReady?.Invoke();
         }
     }
 
