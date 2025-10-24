@@ -114,6 +114,7 @@ public class PlayerControl : MonoBehaviour
             isGravityInverted = true;
             gravityTimer = invertedGravityTime;
             OnGravityInverted?.Invoke(invertedGravityTime);
+            CameraFollow.Instance.Shake(0.5f, 0.02f);
 
             if (CooldownUI.Instance != null)
             {
@@ -138,6 +139,7 @@ public class PlayerControl : MonoBehaviour
         isGravityInverted = false;
         gravityTimer = 0f;
         OnGravityReset?.Invoke();
+        CameraFollow.Instance.Shake(0.1f, 0.2f);
 
         if (CooldownUI.Instance != null)
         {
@@ -190,6 +192,7 @@ public class PlayerControl : MonoBehaviour
     {
         currentLives--;
         Debug.Log("Player tomou dano! Vidas restantes: " + currentLives);
+        CameraFollow.Instance.Shake(0.2f, 0.1f);
 
         if (uiHearts != null)
             uiHearts.UpdateHearts(currentLives);

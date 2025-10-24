@@ -4,6 +4,8 @@ using System.Collections;
 
 public class CameraFollow : MonoBehaviour
 {
+    public static CameraFollow Instance { get; private set; }
+
     [Header("Target")]
     public Transform target;
 
@@ -21,6 +23,19 @@ public class CameraFollow : MonoBehaviour
     [Header("Fade Effect")]
     [SerializeField] private Image fadeImage;
     [SerializeField] private float fadeDuration = 0.5f;
+
+    [Header("Shake Effect")]
+    [SerializeField] private Vector3 originalPos;
+    [SerializeField] private bool isShaking = false;
+    private Vector3 shakeOffset = Vector3.zero;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+            Destroy(gameObject);
+        else
+            Instance = this;
+    }
 
     void OnEnable()
     {
@@ -40,7 +55,6 @@ public class CameraFollow : MonoBehaviour
     private IEnumerator FadeRoutine()
     {
         yield return StartCoroutine(Fade(1f, 0f));
-
         yield return new WaitForSeconds(0.2f);
     }
 
@@ -76,6 +90,31 @@ public class CameraFollow : MonoBehaviour
             smoothedPosition.y = Mathf.Round(smoothedPosition.y / snapValue) * snapValue;
         }
 
-        transform.position = smoothedPosition;
+        transform.position = smoothedPosition + shakeOffset;
+    }
+
+    public void Shake(float duration, float magnitude)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        StartCoroutine(ShakeRoutine(duration, magnitude));
+    }
+
+    private IEnumerator ShakeRoutine(float duration, float magnitude)
+    {
+        isShaking = true;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * magnitude;
+            float y = Random.Range(-1f, 1f) * magnitude;
+            shakeOffset = new Vector3(x, y, 0);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        shakeOffset = Vector3.zero;
+        isShaking = false;
     }
 }
