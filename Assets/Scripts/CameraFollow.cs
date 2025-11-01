@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Rendering.Universal;
 using System.Collections;
 
 public class CameraFollow : MonoBehaviour
@@ -19,6 +20,7 @@ public class CameraFollow : MonoBehaviour
     [Header("Pixel Perfect (opcional)")]
     public bool pixelSnap = false;
     public float snapValue = 0.01f;
+    [SerializeField] private PixelPerfectCamera pixelPerfectCam;
 
     [Header("Fade Effect")]
     [SerializeField] private Image fadeImage;
@@ -29,12 +31,17 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private bool isShaking = false;
     private Vector3 shakeOffset = Vector3.zero;
 
+    private Coroutine fovRoutine;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
             Destroy(gameObject);
         else
             Instance = this;
+
+        if (pixelPerfectCam == null)
+            pixelPerfectCam = GetComponent<PixelPerfectCamera>();
     }
 
     void OnEnable()
@@ -116,5 +123,34 @@ public class CameraFollow : MonoBehaviour
 
         shakeOffset = Vector3.zero;
         isShaking = false;
+    }
+
+    public void ChangePPUSmooth(int targetPPU, float duration)
+    {
+        if (pixelPerfectCam == null) return;
+
+        if (fovRoutine != null)
+            StopCoroutine(fovRoutine);
+
+        fovRoutine = StartCoroutine(ChangePPURoutine(targetPPU, duration));
+    }
+
+    private IEnumerator ChangePPURoutine(int targetPPU, float duration)
+    {
+        int startPPU = pixelPerfectCam.assetsPPU;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float smoothPPU = Mathf.Lerp(startPPU, targetPPU, t);
+
+            pixelPerfectCam.assetsPPU = Mathf.RoundToInt(smoothPPU);
+
+            yield return null;
+        }
+
+        pixelPerfectCam.assetsPPU = targetPPU;
     }
 }

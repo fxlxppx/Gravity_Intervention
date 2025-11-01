@@ -176,6 +176,10 @@ public class PlayerControl : MonoBehaviour
             else
                 return;
         }
+        if (collision.gameObject.CompareTag("FOV"))
+        {
+            CameraFollow.Instance.ChangePPUSmooth(7, 0.5f);
+        }
     }
 
     private void ResetPlayer()
