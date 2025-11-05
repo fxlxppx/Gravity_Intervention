@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   damage: 1
-  lifetime: 3
+  lifetime: 2
 --- !u!50 &3890170700438370354
 Rigidbody2D:
   serializedVersion: 5

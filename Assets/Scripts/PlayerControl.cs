@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using UnityEngine.Rendering.Universal;
+using Unity.VisualScripting;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -23,6 +25,8 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private float invertedGravity = -0.5f;
     [SerializeField] private float invertedGravityTime = 3f;
     [SerializeField] private float gravityCooldown = 5f;
+    [SerializeField] private Light2D gravityIndicatorLight;
+    [SerializeField] private float lightIncreaseDuration = 0.5f;
 
     private bool isGravityInverted = false;
     private float gravityTimer = 0f;
@@ -107,6 +111,8 @@ public class PlayerControl : MonoBehaviour
         {
             rb.gravityScale = invertedGravity;
 
+            StartCoroutine(IncreaseLightIntensity(0f, 3f, lightIncreaseDuration));
+
             Vector3 scale = transform.localScale;
             scale.y *= -1;
             transform.localScale = scale;
@@ -135,6 +141,7 @@ public class PlayerControl : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.y = Mathf.Abs(scale.y);
         transform.localScale = scale;
+        StartCoroutine(IncreaseLightIntensity(3f, 0f, lightIncreaseDuration));
 
         isGravityInverted = false;
         gravityTimer = 0f;
@@ -238,4 +245,20 @@ public class PlayerControl : MonoBehaviour
         gameObject.layer = originalLayer;
     }
 
+    private IEnumerator IncreaseLightIntensity(float start, float end, float duration)
+    {
+        if (gravityIndicatorLight == null) yield break;
+
+        float elapsed = 0f;
+        gravityIndicatorLight.intensity = start;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            gravityIndicatorLight.intensity = Mathf.Lerp(start, end, elapsed / duration);
+            yield return null;
+        }
+
+        gravityIndicatorLight.intensity = end;
+    }
 }

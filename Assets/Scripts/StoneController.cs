@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class PushableStone : MonoBehaviour
 {
@@ -12,17 +13,30 @@ public class PushableStone : MonoBehaviour
     private bool isGravityInverted = false;
     private bool playerInsideTrigger = false;
 
+    [Header("Luz da Pedra")]
+    [SerializeField] private Light2D stoneLight;
+    [SerializeField] private float lightFadeSpeed = 3f;
+    [SerializeField] private float targetIntensityOn = 3f;
+    [SerializeField] private float targetIntensityOff = 0f;
+
+    private float currentTargetIntensity;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+
+        if (stoneLight == null)
+            stoneLight = GetComponentInChildren<Light2D>();
     }
 
     private void Start()
     {
         rb.gravityScale = normalGravity;
         initialPosition = transform.position;
-
         CheckpointManager.OnPlayerRespawn += ResetToInitialPosition;
+
+        if (stoneLight != null)
+            stoneLight.intensity = 0f;
     }
 
     private void OnDestroy()
@@ -44,6 +58,15 @@ public class PushableStone : MonoBehaviour
             {
                 ResetGravity();
             }
+        }
+
+        if (stoneLight != null)
+        {
+            stoneLight.intensity = Mathf.Lerp(
+                stoneLight.intensity,
+                currentTargetIntensity,
+                Time.deltaTime * lightFadeSpeed
+            );
         }
     }
 
@@ -72,6 +95,7 @@ public class PushableStone : MonoBehaviour
         transform.position = initialPosition;
 
         ResetGravity();
+        currentTargetIntensity = targetIntensityOff;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -79,6 +103,7 @@ public class PushableStone : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             playerInsideTrigger = true;
+            currentTargetIntensity = targetIntensityOn; // acende a luz
         }
     }
 
@@ -87,6 +112,7 @@ public class PushableStone : MonoBehaviour
         if (collision.CompareTag("Player"))
         {
             playerInsideTrigger = false;
+            currentTargetIntensity = targetIntensityOff; // apaga a luz
             ResetGravity();
         }
     }
