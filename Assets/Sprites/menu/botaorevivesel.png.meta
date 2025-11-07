@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 17478c9bc0ac0aa4c9270d203ebe57cc
+guid: dc364d5cf828d0f4b85dc04aba80893b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7503620967622382577
-    second: botaoajustessel_0
+      213: 867166992102971513
+    second: botaorevivesel_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: botaoajustessel_0
+      name: botaorevivesel_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 82
-        height: 14
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f0ce1bf5c78cdd790800000000000000
-      internalID: -7503620967622382577
+      spriteID: 978dd3de8cbc80c00800000000000000
+      internalID: 867166992102971513
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      botaoajustessel_0: -7503620967622382577
+      botaorevivesel_0: 867166992102971513
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

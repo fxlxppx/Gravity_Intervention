@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ece09a7769b2ed745ac858143bbd5cda
+guid: ab0bc541cbaeb214591e69a0579c16cd
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6903857489387045825
-    second: botaoacarregarpng_0
+      213: -4133342635773548602
+    second: botaoloadsel_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: botaoacarregarpng_0
+      name: botaoloadsel_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 82
-        height: 14
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1c3c5d2fecd6fcf50800000000000000
-      internalID: 6903857489387045825
+      spriteID: 6c7adbba5ca63a6c0800000000000000
+      internalID: -4133342635773548602
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      botaoacarregarpng_0: 6903857489387045825
+      botaoloadsel_0: -4133342635773548602
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
