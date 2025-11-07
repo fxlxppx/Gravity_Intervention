@@ -23,6 +23,9 @@ public class GateController2D : MonoBehaviour
     public Vector3 openOffset = new Vector3(0, 2f, 0);
     public float moveTime = 0.25f;
 
+    [Header("Partículas do Portão")]
+    [SerializeField] private ParticleSystem gateParticles;
+
     private Vector3 closedLocalPos;
     private bool isOpen = false;
     private bool permanentlyOpen = false;
@@ -33,6 +36,9 @@ public class GateController2D : MonoBehaviour
         closedLocalPos = transform.localPosition;
         if (blockingCollider == null)
             blockingCollider = GetComponent<Collider2D>();
+
+        if (gateParticles == null)
+            gateParticles = GetComponentInChildren<ParticleSystem>();
     }
 
     private void OnEnable()
@@ -90,6 +96,14 @@ public class GateController2D : MonoBehaviour
         if (isOpen && behavior == GateBehavior.StayOpen)
             permanentlyOpen = true;
 
+        if (gateParticles != null)
+        {
+            if (isOpen && !gateParticles.isPlaying)
+                gateParticles.Play();
+            else if (!isOpen && gateParticles.isPlaying)
+                gateParticles.Stop();
+        }
+
         if (useAnimator && animator != null)
         {
             animator.SetBool("Open", isOpen);
@@ -116,6 +130,9 @@ public class GateController2D : MonoBehaviour
 
     private IEnumerator MoveGate(Vector3 targetLocalPos, float time)
     {
+        if (gateParticles != null && !gateParticles.isPlaying)
+            gateParticles.Play();
+
         Vector3 from = transform.localPosition;
         float t = 0f;
         while (t < time)
@@ -124,7 +141,11 @@ public class GateController2D : MonoBehaviour
             t += Time.deltaTime;
             yield return null;
         }
+
         transform.localPosition = targetLocalPos;
+
+        if (gateParticles != null && gateParticles.isPlaying)
+            gateParticles.Stop();
     }
 
     private void ResetToInitialState()
@@ -149,6 +170,9 @@ public class GateController2D : MonoBehaviour
 
         if (blockingCollider != null)
             blockingCollider.enabled = true;
+
+        if (gateParticles != null)
+            gateParticles.Stop();
 
         Debug.Log($"GateController2D ({color}): Resetado ao estado inicial.");
     }

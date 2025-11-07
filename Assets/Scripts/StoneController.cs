@@ -21,12 +21,18 @@ public class PushableStone : MonoBehaviour
 
     private float currentTargetIntensity;
 
+    [Header("Partículas da Pedra")]
+    [SerializeField] private ParticleSystem stoneParticles;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
 
         if (stoneLight == null)
             stoneLight = GetComponentInChildren<Light2D>();
+
+        if (stoneParticles == null)
+            stoneParticles = GetComponentInChildren<ParticleSystem>();
     }
 
     private void Start()
@@ -37,6 +43,9 @@ public class PushableStone : MonoBehaviour
 
         if (stoneLight != null)
             stoneLight.intensity = 0f;
+
+        if (stoneParticles != null)
+            stoneParticles.Stop();
     }
 
     private void OnDestroy()
@@ -77,6 +86,9 @@ public class PushableStone : MonoBehaviour
         scale.y = -Mathf.Abs(scale.y);
         transform.localScale = scale;
         isGravityInverted = true;
+
+        if (stoneParticles != null && !stoneParticles.isPlaying)
+            stoneParticles.Play();
     }
 
     private void ResetGravity()
@@ -86,6 +98,9 @@ public class PushableStone : MonoBehaviour
         scale.y = Mathf.Abs(scale.y);
         transform.localScale = scale;
         isGravityInverted = false;
+
+        if (stoneParticles != null && stoneParticles.isPlaying)
+            stoneParticles.Stop();
     }
 
     private void ResetToInitialPosition()
