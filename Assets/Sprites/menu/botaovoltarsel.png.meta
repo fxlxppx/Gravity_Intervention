@@ -103,9 +103,9 @@ TextureImporter:
       name: botaovoltarsel_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 30
         y: 0
-        width: 82
+        width: 20
         height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
