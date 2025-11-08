@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class ButtonSystem
 {
@@ -9,17 +10,24 @@ public static class ButtonSystem
 
     public static void ReportButtonState(DoorColorEnum color, bool pressed)
     {
-        if (!pressedCounts.ContainsKey(color)) pressedCounts[color] = 0;
+        if (!pressedCounts.ContainsKey(color))
+            pressedCounts[color] = 0;
 
-        if (pressed) pressedCounts[color] = pressedCounts[color] + 1;
-        else pressedCounts[color] = Math.Max(0, pressedCounts[color] - 1);
+        if (pressed)
+            pressedCounts[color] = pressedCounts[color] + 1;
+        else
+            pressedCounts[color] = Math.Max(0, pressedCounts[color] - 1);
+
+        string action = pressed ? "PRESSIONADO" : "SOLTO";
+        Debug.Log($"[ButtonSystem] Botão {color} foi {action}. Total atual: {pressedCounts[color]}");
 
         OnButtonPressedCountChanged?.Invoke(color, pressedCounts[color]);
     }
 
     public static int GetPressedCount(DoorColorEnum color)
     {
-        if (pressedCounts.TryGetValue(color, out int v)) return v;
+        if (pressedCounts.TryGetValue(color, out int v))
+            return v;
         return 0;
     }
 }
