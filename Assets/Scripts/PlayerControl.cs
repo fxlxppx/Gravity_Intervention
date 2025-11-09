@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
 using UnityEngine.Rendering.Universal;
-using Unity.VisualScripting;
 
 public class PlayerControl : MonoBehaviour
 {
@@ -15,7 +14,8 @@ public class PlayerControl : MonoBehaviour
     [Header("Movimento")]
     [SerializeField] private float moveSpeed = 5f;
     private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private Animator animator;
     private InputSystem_Actions controls;
 
     private float moveInput;
@@ -31,6 +31,7 @@ public class PlayerControl : MonoBehaviour
     private bool isGravityInverted = false;
     private float gravityTimer = 0f;
     private float cooldownTimer = 0f;
+    private bool isDead = false;
 
     [Header("Vida do Player")]
     [SerializeField] private int maxLives = 3;
@@ -42,19 +43,18 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private float blinkInterval = 0.2f;
     [SerializeField] private bool isInvulnerable = false;
 
+    [SerializeField] private GameObject bossHUD;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
-
         controls = new InputSystem_Actions();
 
         controls.Player.move.performed += ctx => moveInput = ctx.ReadValue<float>();
         controls.Player.move.canceled += ctx => moveInput = 0f;
-
         controls.Player.flip_gravity.performed += ctx => FlipGravity();
     }
 
@@ -76,12 +76,17 @@ public class PlayerControl : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (isDead) return;
+
         rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
 
         if (moveInput > 0.1f)
             spriteRenderer.flipX = false;
         else if (moveInput < -0.1f)
             spriteRenderer.flipX = true;
+
+        if (animator != null)
+            animator.SetFloat("Speed", Mathf.Abs(moveInput));
 
         if (isGravityInverted)
         {
@@ -105,12 +110,14 @@ public class PlayerControl : MonoBehaviour
 
     private void FlipGravity()
     {
-        if (cooldownTimer > 0f) return;
+        if (cooldownTimer > 0f || isDead) return;
 
         if (!isGravityInverted)
         {
-            rb.gravityScale = invertedGravity;
+            if (animator != null)
+                animator.SetTrigger("GravitySwap");
 
+            rb.gravityScale = invertedGravity;
             StartCoroutine(IncreaseLightIntensity(0f, 3f, lightIncreaseDuration));
 
             Vector3 scale = transform.localScale;
@@ -123,19 +130,20 @@ public class PlayerControl : MonoBehaviour
             CameraFollow.Instance.Shake(0.5f, 0.02f);
 
             if (CooldownUI.Instance != null)
-            {
                 CooldownUI.Instance.StartCooldown(gravityCooldown);
-            }
         }
         else
         {
             ResetGravity();
         }
+
         cooldownTimer = gravityCooldown;
     }
 
     private void ResetGravity()
     {
+        if (isDead) return;
+
         rb.gravityScale = normalGravity;
 
         Vector3 scale = transform.localScale;
@@ -149,19 +157,13 @@ public class PlayerControl : MonoBehaviour
         CameraFollow.Instance.Shake(0.1f, 0.2f);
 
         if (CooldownUI.Instance != null)
-        {
             CooldownUI.Instance.FinishCooldown();
-        }
+
         if (cooldownTimer <= 0f)
-        {
             OnGravityReady?.Invoke();
-        }
     }
 
-    public bool IsGravityInverted()
-    {
-        return isGravityInverted;
-    }
+    public bool IsGravityInverted() => isGravityInverted;
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -169,8 +171,6 @@ public class PlayerControl : MonoBehaviour
         {
             if (!isInvulnerable)
                 TakeDamage();
-            else
-                return;
         }
     }
 
@@ -180,13 +180,15 @@ public class PlayerControl : MonoBehaviour
         {
             if (!isInvulnerable)
                 TakeDamage();
-            else
-                return;
         }
+
         if (collision.gameObject.CompareTag("FOV"))
         {
-            CameraFollow.Instance.ChangePPUSmooth(7, 0.5f);
+            CameraFollow.Instance.TriggerBossFocus(8, 2f);
+            bossHUD.SetActive(true);
+            collision.gameObject.SetActive(false);
         }
+        
     }
 
     private void ResetPlayer()
@@ -194,6 +196,13 @@ public class PlayerControl : MonoBehaviour
         gameObject.SetActive(true);
         currentLives = maxLives;
         isInvulnerable = false;
+        isDead = false;
+
+        if (animator != null)
+        {
+            animator.ResetTrigger("Death");
+            animator.Play("Idle", 0, 0f);
+        }
 
         if (uiHearts != null)
             uiHearts.UpdateHearts(currentLives);
@@ -201,6 +210,8 @@ public class PlayerControl : MonoBehaviour
 
     private void TakeDamage()
     {
+        if (isDead) return;
+
         currentLives--;
         Debug.Log("Player tomou dano! Vidas restantes: " + currentLives);
         CameraFollow.Instance.Shake(0.2f, 0.1f);
@@ -209,18 +220,27 @@ public class PlayerControl : MonoBehaviour
             uiHearts.UpdateHearts(currentLives);
 
         if (currentLives <= 0)
-        {
             Die();
-        }
         else
-        {
             StartCoroutine(InvulnerabilityRoutine());
-        }
     }
 
     private void Die()
     {
+        if (isDead) return;
+
+        isDead = true;
         Debug.Log("Player morreu sem vidas!");
+
+        if (animator != null)
+            animator.SetTrigger("Death");
+
+        StartCoroutine(DeathRoutine());
+    }
+
+    private IEnumerator DeathRoutine()
+    {
+        yield return new WaitForSeconds(0.8f); // tempo aproximado da animação de morte
         gameObject.SetActive(false);
         OnPlayerDied?.Invoke();
     }

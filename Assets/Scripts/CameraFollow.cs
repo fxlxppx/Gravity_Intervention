@@ -9,6 +9,8 @@ public class CameraFollow : MonoBehaviour
 
     [Header("Target")]
     public Transform target;
+    [Tooltip("Referência do boss para foco temporário de câmera.")]
+    public Transform bossTarget;
 
     [Header("Offsets")]
     public Vector3 offset = new Vector3(0, 0, -10);
@@ -32,6 +34,7 @@ public class CameraFollow : MonoBehaviour
     private Vector3 shakeOffset = Vector3.zero;
 
     private Coroutine fovRoutine;
+    private Transform playerTarget; // Guarda o player original
 
     void Awake()
     {
@@ -42,6 +45,8 @@ public class CameraFollow : MonoBehaviour
 
         if (pixelPerfectCam == null)
             pixelPerfectCam = GetComponent<PixelPerfectCamera>();
+
+        playerTarget = target; // guarda o player
     }
 
     void OnEnable()
@@ -125,6 +130,32 @@ public class CameraFollow : MonoBehaviour
         isShaking = false;
     }
 
+    // Troca de FOV e foco para o boss
+    public void TriggerBossFocus(int newPPU, float focusDuration = 1f)
+    {
+        if (pixelPerfectCam == null || bossTarget == null)
+        {
+            Debug.LogWarning("CameraFollow: faltando referência de PixelPerfectCamera ou BossTarget.");
+            return;
+        }
+
+        // Aumenta FOV de uma vez
+        pixelPerfectCam.assetsPPU = newPPU;
+
+        // Troca o alvo para o boss e volta depois
+        if (fovRoutine != null)
+            StopCoroutine(fovRoutine);
+        fovRoutine = StartCoroutine(FocusOnBossRoutine(focusDuration));
+    }
+
+    private IEnumerator FocusOnBossRoutine(float duration)
+    {
+        target = bossTarget;
+        yield return new WaitForSeconds(duration);
+        target = playerTarget;
+    }
+
+    // Ainda disponível para usos antigos
     public void ChangePPUSmooth(int targetPPU, float duration)
     {
         if (pixelPerfectCam == null) return;
@@ -145,9 +176,7 @@ public class CameraFollow : MonoBehaviour
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / duration);
             float smoothPPU = Mathf.Lerp(startPPU, targetPPU, t);
-
             pixelPerfectCam.assetsPPU = Mathf.RoundToInt(smoothPPU);
-
             yield return null;
         }
 

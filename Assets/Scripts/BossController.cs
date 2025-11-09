@@ -1,8 +1,12 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class BossController : MonoBehaviour
 {
+    public static event Action<BossController> OnBossDamaged;
+    public static event Action<BossController> OnBossDeath;
+
     [Header("Patrulha")]
     public float moveSpeed = 3f;
     public Transform[] waypointObjects;
@@ -18,8 +22,14 @@ public class BossController : MonoBehaviour
     private bool isAttacking = false;
 
     [Header("Vida do Boss")]
-    public float maxHealth = 10f;
-    private float currentHealth;
+    public int maxHealth = 6;
+    private int currentHealth;
+
+    [Header("Referências")]
+    [SerializeField] private Animator animator;
+    [SerializeField] private BossHealthDisplay bossHealthDisplay;
+    [SerializeField] private GameObject bossHUD;
+
 
     private void Start()
     {
@@ -28,7 +38,11 @@ public class BossController : MonoBehaviour
         {
             waypoints[i] = waypointObjects[i].position;
         }
+
         currentHealth = maxHealth;
+
+        if (animator != null)
+            animator.Play("EnemyIdle");
     }
 
     private void Update()
@@ -46,7 +60,7 @@ public class BossController : MonoBehaviour
 
         transform.position = Vector2.MoveTowards(currentPos, target, moveSpeed * Time.deltaTime);
 
-        if (Vector2.Distance(currentPos, target) < 0.2f) // margem menor
+        if (Vector2.Distance(currentPos, target) < 0.2f)
         {
             StartCoroutine(AttackAtWaypoint());
             currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
@@ -57,13 +71,32 @@ public class BossController : MonoBehaviour
     {
         isAttacking = true;
 
+        if (animator != null)
+            animator.SetTrigger("Attack");
+
+        yield return StartCoroutine(WaitForAnimationTime("EnemyAttack", 0.5f));
+
         for (int i = 0; i < blobsPerAttack; i++)
         {
             ShootBlob();
         }
 
         yield return new WaitForSeconds(attackCooldown);
+
         isAttacking = false;
+    }
+
+    private IEnumerator WaitForAnimationTime(string animationName, float normalizedTime)
+    {
+        if (animator == null) yield break;
+
+        yield return null;
+
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName(animationName))
+            yield return null;
+
+        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < normalizedTime)
+            yield return null;
     }
 
     private void ShootBlob()
@@ -74,23 +107,60 @@ public class BossController : MonoBehaviour
         Rigidbody2D rb = blob.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            Vector2 direction = new Vector2(Random.Range(-1f, 1f), 1f).normalized;
+            Vector2 direction = new Vector2(UnityEngine.Random.Range(-1f, 1f), 1f).normalized;
             rb.AddForce(direction * blobForce, ForceMode2D.Impulse);
         }
     }
-    public void TakeDamage(float amount)
+
+    public void TakeDamage(int amount)
     {
         currentHealth -= amount;
 
+        if (bossHealthDisplay != null)
+        {
+            bossHealthDisplay.UpdateHealth();
+        }
+
+        if (animator != null)
+            animator.SetTrigger("Damage");
+
+        StopAllCoroutines();
+        StartCoroutine(DamageRoutine());
+
+        OnBossDamaged?.Invoke(this);
+
         if (currentHealth <= 0)
         {
-            Die();
+            StartCoroutine(DieSequence());
         }
+    }
+
+    private IEnumerator DamageRoutine()
+    {
+        isAttacking = true;
+
+        yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("EnemyDamage"));
+
+        yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
+
+        isAttacking = false;
+    }
+
+    private IEnumerator DieSequence()
+    {
+        if (animator != null)
+            animator.SetTrigger("Death");
+
+        yield return new WaitForSeconds(1.2f);
+        Die();
     }
 
     private void Die()
     {
-        Destroy(gameObject);
+        OnBossDeath?.Invoke(this);
+
         ButtonSystem.ReportButtonState(DoorColorEnum.Black, true);
+        Destroy(gameObject);
+        bossHUD.SetActive(false);
     }
 }

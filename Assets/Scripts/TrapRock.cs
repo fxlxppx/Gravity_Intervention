@@ -3,7 +3,7 @@ using UnityEngine;
 public class FallingRock : MonoBehaviour
 {
     [Header("Configuração da Pedra")]
-    public float damage = 1f;
+    public int damage = 1;
     public float lifetime = 10f;
 
     private void Start()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Rendering.Universal;
 
 [RequireComponent(typeof(Collider2D))]
 public class ButtonController2D : MonoBehaviour
@@ -27,6 +28,10 @@ public class ButtonController2D : MonoBehaviour
     public UnityEvent onPressed;
     public UnityEvent onReleased;
 
+    [Header("Indicador Visual (Luz)")]
+    [Tooltip("Luz que indica o estado do botão (acesa = pressionado)")]
+    [SerializeField] private Light2D buttonLight;
+
     private HashSet<GameObject> activators = new HashSet<GameObject>();
     private bool isPressed = false;
     private Vector3 visualClosedLocalPos;
@@ -45,6 +50,11 @@ public class ButtonController2D : MonoBehaviour
     private void OnDisable()
     {
         CheckpointManager.OnPlayerRespawn -= ResetToInitialState;
+    }
+
+    private void Start()
+    {
+        UpdateLightState(isPressed);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -115,6 +125,8 @@ public class ButtonController2D : MonoBehaviour
             StopAllCoroutines();
             StartCoroutine(AnimateVisual(visualRoot.localPosition, visualClosedLocalPos, animationTime));
         }
+
+        UpdateLightState(isPressed);
     }
 
     private IEnumerator AnimateVisual(Vector3 from, Vector3 to, float time)
@@ -154,6 +166,16 @@ public class ButtonController2D : MonoBehaviour
 
         if (visualRoot != null)
             visualRoot.localPosition = visualClosedLocalPos;
+
+        UpdateLightState(false);
+    }
+
+    private void UpdateLightState(bool isOn)
+    {
+        if (buttonLight == null) return;
+        buttonLight.enabled = isOn;
+
+         buttonLight.intensity = isOn ? 1f : 0f;
     }
 
 #if UNITY_EDITOR
