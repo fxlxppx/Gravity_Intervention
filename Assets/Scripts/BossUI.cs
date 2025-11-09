@@ -36,7 +36,6 @@ public class BossHealthDisplay : MonoBehaviour
     public void UpdateHealth()
     {
         currentHealth -= 1;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth - 1);
 
         UpdateSprite(currentHealth);
     }
@@ -49,6 +48,7 @@ public class BossHealthDisplay : MonoBehaviour
         if (current >= 0 && current < healthStates.Length)
         {
             image.sprite = healthStates[current];
+            Debug.Log("Updated boss health sprite to state " + current);
         }
     }
 }

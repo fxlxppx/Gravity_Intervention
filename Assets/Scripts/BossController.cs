@@ -83,6 +83,8 @@ public class BossController : MonoBehaviour
 
         yield return new WaitForSeconds(attackCooldown);
 
+        animator.ResetTrigger("Attack");
+        animator.SetTrigger("Idle");
         isAttacking = false;
     }
 
@@ -116,15 +118,9 @@ public class BossController : MonoBehaviour
     {
         currentHealth -= amount;
 
-        if (bossHealthDisplay != null)
-        {
-            bossHealthDisplay.UpdateHealth();
-        }
-
         if (animator != null)
             animator.SetTrigger("Damage");
 
-        StopAllCoroutines();
         StartCoroutine(DamageRoutine());
 
         OnBossDamaged?.Invoke(this);
@@ -137,13 +133,15 @@ public class BossController : MonoBehaviour
 
     private IEnumerator DamageRoutine()
     {
+        bool wasAttacking = isAttacking;
         isAttacking = true;
 
         yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("EnemyDamage"));
-
         yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
 
-        isAttacking = false;
+        animator.ResetTrigger("Damage");
+        animator.SetTrigger("Idle");
+        isAttacking = wasAttacking && currentHealth > 0 ? false : false;
     }
 
     private IEnumerator DieSequence()
