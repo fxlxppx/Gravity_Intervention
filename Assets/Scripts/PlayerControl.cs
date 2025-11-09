@@ -45,6 +45,19 @@ public class PlayerControl : MonoBehaviour
 
     [SerializeField] private GameObject bossHUD;
 
+    [Header("Áudio")]
+    [SerializeField] private AudioSource playerAudioSource;
+    [SerializeField] private AudioClip gravityFlipSound;
+    [SerializeField] private AudioClip gravityResetSound;
+    [SerializeField] private AudioClip damageSound;
+    [SerializeField] private AudioClip deathSound;
+
+    [Header("Som de Passos")]
+    [SerializeField] private AudioSource footstepSource;
+    [SerializeField] private float minMoveSpeed = 0.1f;
+
+    private int collisionCount = 0;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
@@ -88,13 +101,13 @@ public class PlayerControl : MonoBehaviour
         if (animator != null)
             animator.SetFloat("Speed", Mathf.Abs(moveInput));
 
+        UpdateFootstepSound();
+
         if (isGravityInverted)
         {
             gravityTimer -= Time.fixedDeltaTime;
             if (gravityTimer <= 0)
-            {
                 ResetGravity();
-            }
         }
 
         if (cooldownTimer > 0)
@@ -105,6 +118,57 @@ public class PlayerControl : MonoBehaviour
                 cooldownTimer = 0;
                 OnGravityReady?.Invoke();
             }
+        }
+    }
+
+    private void UpdateFootstepSound()
+    {
+        if (footstepSource == null) return;
+
+        bool isMoving = Mathf.Abs(moveInput) > minMoveSpeed;
+        bool isGrounded = collisionCount > 0;
+
+        if (isMoving && isGrounded)
+        {
+            if (!footstepSource.isPlaying)
+                footstepSource.Play();
+        }
+        else
+        {
+            if (footstepSource.isPlaying)
+                footstepSource.Pause();
+        }
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        collisionCount++;
+        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs") || collision.gameObject.CompareTag("Boss"))
+        {
+            if (!isInvulnerable)
+                TakeDamage();
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        collisionCount--;
+        if (collisionCount < 0) collisionCount = 0;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs") || collision.gameObject.CompareTag("Boss"))
+        {
+            if (!isInvulnerable)
+                TakeDamage();
+        }
+
+        if (collision.gameObject.CompareTag("FOV"))
+        {
+            CameraFollow.Instance.TriggerBossFocus(8, 2f);
+            bossHUD.SetActive(true);
+            collision.gameObject.SetActive(false);
         }
     }
 
@@ -128,6 +192,8 @@ public class PlayerControl : MonoBehaviour
             gravityTimer = invertedGravityTime;
             OnGravityInverted?.Invoke(invertedGravityTime);
             CameraFollow.Instance.Shake(0.5f, 0.02f);
+
+            PlaySound(gravityFlipSound, 1f, 1f);
 
             if (CooldownUI.Instance != null)
                 CooldownUI.Instance.StartCooldown(gravityCooldown);
@@ -156,6 +222,8 @@ public class PlayerControl : MonoBehaviour
         OnGravityReset?.Invoke();
         CameraFollow.Instance.Shake(0.1f, 0.2f);
 
+        PlaySound(gravityResetSound, 0.1f, 1f);
+
         if (CooldownUI.Instance != null)
             CooldownUI.Instance.FinishCooldown();
 
@@ -164,32 +232,6 @@ public class PlayerControl : MonoBehaviour
     }
 
     public bool IsGravityInverted() => isGravityInverted;
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs") || collision.gameObject.CompareTag("Boss"))
-        {
-            if (!isInvulnerable)
-                TakeDamage();
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("Blobs") || collision.gameObject.CompareTag("Boss"))
-        {
-            if (!isInvulnerable)
-                TakeDamage();
-        }
-
-        if (collision.gameObject.CompareTag("FOV"))
-        {
-            CameraFollow.Instance.TriggerBossFocus(8, 2f);
-            bossHUD.SetActive(true);
-            collision.gameObject.SetActive(false);
-        }
-        
-    }
 
     private void ResetPlayer()
     {
@@ -216,6 +258,8 @@ public class PlayerControl : MonoBehaviour
         Debug.Log("Player tomou dano! Vidas restantes: " + currentLives);
         CameraFollow.Instance.Shake(0.2f, 0.1f);
 
+        PlaySound(damageSound, Random.Range(0.9f, 1.1f));
+
         if (uiHearts != null)
             uiHearts.UpdateHearts(currentLives);
 
@@ -232,6 +276,8 @@ public class PlayerControl : MonoBehaviour
         isDead = true;
         Debug.Log("Player morreu sem vidas!");
 
+        PlaySound(deathSound, 1.0f);
+
         if (animator != null)
             animator.SetTrigger("Death");
 
@@ -240,7 +286,7 @@ public class PlayerControl : MonoBehaviour
 
     private IEnumerator DeathRoutine()
     {
-        yield return new WaitForSeconds(0.8f); // tempo aproximado da animação de morte
+        yield return new WaitForSeconds(0.8f);
         gameObject.SetActive(false);
         OnPlayerDied?.Invoke();
     }
@@ -280,5 +326,15 @@ public class PlayerControl : MonoBehaviour
         }
 
         gravityIndicatorLight.intensity = end;
+    }
+
+    private void PlaySound(AudioClip clip, float volume, float pitch = 1f)
+    {
+        if (playerAudioSource == null || clip == null) return;
+        playerAudioSource.Stop();
+        playerAudioSource.volume = volume;
+        playerAudioSource.pitch = pitch;
+        playerAudioSource.clip = clip;
+        playerAudioSource.Play();
     }
 }

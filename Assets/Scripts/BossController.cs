@@ -30,34 +30,37 @@ public class BossController : MonoBehaviour
     [SerializeField] private BossHealthDisplay bossHealthDisplay;
     [SerializeField] private GameObject bossHUD;
 
+    [Header("Áudio")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip idleSound;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] private AudioClip deathSound;
+    [SerializeField] private AudioClip damageSound;
 
     private void Start()
     {
         waypoints = new Vector2[waypointObjects.Length];
         for (int i = 0; i < waypointObjects.Length; i++)
-        {
             waypoints[i] = waypointObjects[i].position;
-        }
 
         currentHealth = maxHealth;
 
         if (animator != null)
             animator.Play("EnemyIdle");
+
+        PlayIdleSound();
     }
 
     private void Update()
     {
         if (!isAttacking && waypoints.Length > 0)
-        {
             MoveToWaypoint();
-        }
     }
 
     private void MoveToWaypoint()
     {
         Vector2 currentPos = new Vector2(transform.position.x, transform.position.y);
         Vector2 target = waypoints[currentWaypoint];
-
         transform.position = Vector2.MoveTowards(currentPos, target, moveSpeed * Time.deltaTime);
 
         if (Vector2.Distance(currentPos, target) < 0.2f)
@@ -70,33 +73,31 @@ public class BossController : MonoBehaviour
     private IEnumerator AttackAtWaypoint()
     {
         isAttacking = true;
+        StopIdleSound();
 
         if (animator != null)
             animator.SetTrigger("Attack");
 
+        PlaySound(attackSound, 1f, 1f);
         yield return StartCoroutine(WaitForAnimationTime("EnemyAttack", 0.5f));
 
         for (int i = 0; i < blobsPerAttack; i++)
-        {
             ShootBlob();
-        }
 
         yield return new WaitForSeconds(attackCooldown);
-
         animator.ResetTrigger("Attack");
         animator.SetTrigger("Idle");
+
         isAttacking = false;
+        PlayIdleSound();
     }
 
     private IEnumerator WaitForAnimationTime(string animationName, float normalizedTime)
     {
         if (animator == null) yield break;
-
         yield return null;
-
         while (!animator.GetCurrentAnimatorStateInfo(0).IsName(animationName))
             yield return null;
-
         while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < normalizedTime)
             yield return null;
     }
@@ -105,7 +106,6 @@ public class BossController : MonoBehaviour
     {
         Vector3 spawnPos = transform.position + Vector3.up * 1f;
         GameObject blob = Instantiate(blobPrefab, spawnPos, Quaternion.identity);
-
         Rigidbody2D rb = blob.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -117,28 +117,22 @@ public class BossController : MonoBehaviour
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
-
         if (animator != null)
             animator.SetTrigger("Damage");
-
+        PlaySound(damageSound, 1f, 1f);
         StartCoroutine(DamageRoutine());
-
         OnBossDamaged?.Invoke(this);
 
         if (currentHealth <= 0)
-        {
             StartCoroutine(DieSequence());
-        }
     }
 
     private IEnumerator DamageRoutine()
     {
         bool wasAttacking = isAttacking;
         isAttacking = true;
-
         yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("EnemyDamage"));
         yield return new WaitWhile(() => animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f);
-
         animator.ResetTrigger("Damage");
         animator.SetTrigger("Idle");
         isAttacking = wasAttacking && currentHealth > 0 ? false : false;
@@ -146,6 +140,8 @@ public class BossController : MonoBehaviour
 
     private IEnumerator DieSequence()
     {
+        StopIdleSound();
+        PlaySound(deathSound, 1f, 1f);
         if (animator != null)
             animator.SetTrigger("Death");
 
@@ -156,9 +152,35 @@ public class BossController : MonoBehaviour
     private void Die()
     {
         OnBossDeath?.Invoke(this);
-
         ButtonSystem.ReportButtonState(DoorColorEnum.Black, true);
         Destroy(gameObject);
         bossHUD.SetActive(false);
+    }
+
+    private void PlayIdleSound()
+    {
+        if (audioSource == null || idleSound == null) return;
+        audioSource.clip = idleSound;
+        audioSource.pitch = 0.2f;
+        audioSource.volume = 0.7f;
+        audioSource.loop = true;
+        audioSource.Play();
+    }
+
+    private void StopIdleSound()
+    {
+        if (audioSource != null && audioSource.isPlaying)
+            audioSource.Stop();
+    }
+
+    private void PlaySound(AudioClip clip, float volume, float pitch)
+    {
+        if (audioSource == null || clip == null) return;
+        audioSource.Stop();
+        audioSource.loop = false;
+        audioSource.clip = clip;
+        audioSource.volume = volume;
+        audioSource.pitch = pitch;
+        audioSource.Play();
     }
 }

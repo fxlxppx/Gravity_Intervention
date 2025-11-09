@@ -26,6 +26,10 @@ public class GateController2D : MonoBehaviour
     [Header("Partículas do Portão")]
     [SerializeField] private ParticleSystem gateParticles;
 
+    [Header("Som do Portão")]
+    [SerializeField] private AudioSource gateAudio;
+    [SerializeField] private bool loopWhileOpening = true;
+
     private Vector3 closedLocalPos;
     private bool isOpen = false;
     private bool permanentlyOpen = false;
@@ -39,6 +43,9 @@ public class GateController2D : MonoBehaviour
 
         if (gateParticles == null)
             gateParticles = GetComponentInChildren<ParticleSystem>();
+
+        if (gateAudio == null)
+            gateAudio = GetComponent<AudioSource>();
     }
 
     private void OnEnable()
@@ -96,6 +103,21 @@ public class GateController2D : MonoBehaviour
         if (isOpen && behavior == GateBehavior.StayOpen)
             permanentlyOpen = true;
 
+        if (gateAudio != null)
+        {
+            if (isOpen)
+            {
+                gateAudio.loop = loopWhileOpening;
+                if (!gateAudio.isPlaying)
+                    gateAudio.Play();
+            }
+            else
+            {
+                if (gateAudio.isPlaying)
+                    gateAudio.Stop();
+            }
+        }
+
         if (gateParticles != null)
         {
             if (isOpen && !gateParticles.isPlaying)
@@ -133,6 +155,12 @@ public class GateController2D : MonoBehaviour
         if (gateParticles != null && !gateParticles.isPlaying)
             gateParticles.Play();
 
+        if (gateAudio != null && loopWhileOpening && !gateAudio.isPlaying)
+        {
+            gateAudio.loop = true;
+            gateAudio.Play();
+        }
+
         Vector3 from = transform.localPosition;
         float t = 0f;
         while (t < time)
@@ -146,6 +174,9 @@ public class GateController2D : MonoBehaviour
 
         if (gateParticles != null && gateParticles.isPlaying)
             gateParticles.Stop();
+
+        if (gateAudio != null && gateAudio.isPlaying && loopWhileOpening)
+            gateAudio.Stop();
     }
 
     private void ResetToInitialState()
@@ -173,6 +204,9 @@ public class GateController2D : MonoBehaviour
 
         if (gateParticles != null)
             gateParticles.Stop();
+
+        if (gateAudio != null)
+            gateAudio.Stop();
 
         Debug.Log($"GateController2D ({color}): Resetado ao estado inicial.");
     }
