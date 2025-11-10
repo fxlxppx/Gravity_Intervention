@@ -193,7 +193,7 @@ public class PlayerControl : MonoBehaviour
             OnGravityInverted?.Invoke(invertedGravityTime);
             CameraFollow.Instance.Shake(0.5f, 0.02f);
 
-            PlaySound(gravityFlipSound, 1f, 1f);
+            PlaySound(gravityFlipSound, 0.3f, 1f);
 
             if (CooldownUI.Instance != null)
                 CooldownUI.Instance.StartCooldown(gravityCooldown);
