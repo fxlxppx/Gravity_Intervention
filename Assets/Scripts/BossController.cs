@@ -50,6 +50,15 @@ public class BossController : MonoBehaviour
 
         PlayIdleSound();
     }
+    private void OnEnable()
+    {
+        CheckpointManager.OnPlayerRespawn += ResetBossHealth;
+    }
+
+    private void OnDisable()
+    {
+        CheckpointManager.OnPlayerRespawn -= ResetBossHealth;
+    }
 
     private void Update()
     {
@@ -112,6 +121,17 @@ public class BossController : MonoBehaviour
             Vector2 direction = new Vector2(UnityEngine.Random.Range(-1f, 1f), 1f).normalized;
             rb.AddForce(direction * blobForce, ForceMode2D.Impulse);
         }
+    }
+
+    private void ResetBossHealth()
+    {
+        currentHealth = maxHealth;
+
+        if (bossHealthDisplay != null)
+            bossHealthDisplay.ResetHealth(maxHealth);
+
+        if (animator != null)
+            animator.SetTrigger("Idle");
     }
 
     public void TakeDamage(int amount)

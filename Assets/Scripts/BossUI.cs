@@ -40,6 +40,14 @@ public class BossHealthDisplay : MonoBehaviour
         UpdateSprite(currentHealth);
     }
 
+    public void ResetHealth(int max)
+    {
+        maxHealth = max;
+        currentHealth = maxHealth;
+
+        UpdateSprite(currentHealth);
+    }
+
     private void UpdateSprite(int current)
     {
         if (healthStates == null || healthStates.Length == 0) return;

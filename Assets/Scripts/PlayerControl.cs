@@ -17,7 +17,6 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private Animator animator;
     private InputSystem_Actions controls;
-
     private float moveInput;
 
     [Header("Gravidade")]
@@ -56,6 +55,12 @@ public class PlayerControl : MonoBehaviour
     [SerializeField] private AudioSource footstepSource;
     [SerializeField] private float minMoveSpeed = 0.1f;
 
+    [Header("Áudio Gravidade Loop")]
+    [SerializeField] private AudioSource gravityLoopSource;
+    [SerializeField] private float gravityVolumeMax = 0.8f;
+    [SerializeField] private float gravityFadeDuration = 0.4f;
+    private Coroutine gravityFadeRoutine;
+
     private int collisionCount = 0;
 
     void Awake()
@@ -85,6 +90,14 @@ public class PlayerControl : MonoBehaviour
 
         if (uiHearts != null)
             uiHearts.UpdateHearts(currentLives);
+
+        if (gravityLoopSource != null)
+        {
+            gravityLoopSource.volume = 0f;
+            gravityLoopSource.loop = true;
+            if (!gravityLoopSource.isPlaying)
+                gravityLoopSource.Play();
+        }
     }
 
     void FixedUpdate()
@@ -191,12 +204,14 @@ public class PlayerControl : MonoBehaviour
             isGravityInverted = true;
             gravityTimer = invertedGravityTime;
             OnGravityInverted?.Invoke(invertedGravityTime);
+
             CameraFollow.Instance.Shake(0.5f, 0.02f);
 
-            PlaySound(gravityFlipSound, 0.3f, 1f);
 
             if (CooldownUI.Instance != null)
                 CooldownUI.Instance.StartCooldown(gravityCooldown);
+
+            SetGravityLoopVolume(gravityVolumeMax);
         }
         else
         {
@@ -215,10 +230,12 @@ public class PlayerControl : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.y = Mathf.Abs(scale.y);
         transform.localScale = scale;
+
         StartCoroutine(IncreaseLightIntensity(3f, 0f, lightIncreaseDuration));
 
         isGravityInverted = false;
         gravityTimer = 0f;
+
         OnGravityReset?.Invoke();
         CameraFollow.Instance.Shake(0.1f, 0.2f);
 
@@ -229,6 +246,8 @@ public class PlayerControl : MonoBehaviour
 
         if (cooldownTimer <= 0f)
             OnGravityReady?.Invoke();
+
+        SetGravityLoopVolume(0f);
     }
 
     public bool IsGravityInverted() => isGravityInverted;
@@ -255,9 +274,7 @@ public class PlayerControl : MonoBehaviour
         if (isDead) return;
 
         currentLives--;
-        Debug.Log("Player tomou dano! Vidas restantes: " + currentLives);
         CameraFollow.Instance.Shake(0.2f, 0.1f);
-
         PlaySound(damageSound, Random.Range(0.9f, 1.1f));
 
         if (uiHearts != null)
@@ -274,7 +291,6 @@ public class PlayerControl : MonoBehaviour
         if (isDead) return;
 
         isDead = true;
-        Debug.Log("Player morreu sem vidas!");
 
         PlaySound(deathSound, 1.0f);
 
@@ -331,10 +347,36 @@ public class PlayerControl : MonoBehaviour
     private void PlaySound(AudioClip clip, float volume, float pitch = 1f)
     {
         if (playerAudioSource == null || clip == null) return;
+
         playerAudioSource.Stop();
         playerAudioSource.volume = volume;
         playerAudioSource.pitch = pitch;
         playerAudioSource.clip = clip;
         playerAudioSource.Play();
+    }
+
+    private void SetGravityLoopVolume(float targetVolume)
+    {
+        if (gravityLoopSource == null) return;
+
+        if (gravityFadeRoutine != null)
+            StopCoroutine(gravityFadeRoutine);
+
+        gravityFadeRoutine = StartCoroutine(FadeGravityLoop(targetVolume));
+    }
+
+    private IEnumerator FadeGravityLoop(float target)
+    {
+        float start = gravityLoopSource.volume;
+        float t = 0f;
+
+        while (t < gravityFadeDuration)
+        {
+            t += Time.deltaTime;
+            gravityLoopSource.volume = Mathf.Lerp(start, target, t / gravityFadeDuration);
+            yield return null;
+        }
+
+        gravityLoopSource.volume = target;
     }
 }
