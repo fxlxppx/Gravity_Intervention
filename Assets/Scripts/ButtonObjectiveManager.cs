@@ -95,5 +95,12 @@ public class ButtonObjectiveManager : MonoBehaviour
             StopCoroutine(hideRoutine);
             hideRoutine = null;
         }
+
+        if (UIButtonObjectiveDisplay.Instance != null)
+        {
+            UIButtonObjectiveDisplay.Instance.ShowObjective();
+            UIButtonObjectiveDisplay.Instance.SetFilledCount(0);
+        }
     }
+
 }

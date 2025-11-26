@@ -135,7 +135,11 @@ public class GateController2D : MonoBehaviour
             StopAllCoroutines();
             StartCoroutine(MoveGate(isOpen ? closedLocalPos + openOffset : closedLocalPos, moveTime));
         }
-
+        if (isOpen)
+        {
+            if (CameraFollow.Instance != null)
+                CameraFollow.Instance.TriggerGateFocus(transform, 1.2f, 20);
+        }
         if (disableColliderWhenOpen && blockingCollider != null)
             blockingCollider.enabled = !isOpen;
     }

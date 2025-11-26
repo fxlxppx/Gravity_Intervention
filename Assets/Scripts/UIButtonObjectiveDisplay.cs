@@ -122,8 +122,8 @@ public class UIButtonObjectiveDisplay : MonoBehaviour
     {
         activatedButtons = Mathf.Clamp(count, 0, requiredButtons);
         UpdateIcons();
-    }
 
+    }
     public void ShowObjective()
     {
         gameObject.SetActive(true);
