@@ -605,7 +605,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.80400145, y: -29.499998}
+  m_AnchoredPosition: {x: -0.80400145, y: -42.1}
   m_SizeDelta: {x: 25, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &714409524
@@ -1123,6 +1123,104 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1369523563}
   m_CullTransparentMesh: 1
+--- !u!1 &1476502400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1476502401}
+  - component: {fileID: 1476502404}
+  - component: {fileID: 1476502403}
+  - component: {fileID: 1476502402}
+  m_Layer: 5
+  m_Name: Panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1476502401
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1476502400}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 2.376454, y: 1.1533238, z: 1.6187}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1968738342}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -35.199997, y: 1.5}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!95 &1476502402
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1476502400}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8fc8ec009f8b989498715610efcd89d4, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1476502403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1476502400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0.9803922, b: 0.9803922, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -1193667998, guid: 147d7a825db4ab94296d6ceb68b671a6, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1476502404
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1476502400}
+  m_CullTransparentMesh: 1
 --- !u!1 &1578064431
 GameObject:
   m_ObjectHideFlags: 0
@@ -1226,14 +1324,14 @@ RectTransform:
   m_GameObject: {fileID: 1589734516}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.3255227, y: 2.3255227, z: 2.3255227}
+  m_LocalScale: {x: 1.1364319, y: 3.7118833, z: 0.8452942}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 213998461}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.39999998, y: -47.8}
+  m_AnchoredPosition: {x: 60.6, y: -71.4}
   m_SizeDelta: {x: 25, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1589734518
@@ -1265,7 +1363,7 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: -6373792479334291178, guid: 3b7f9f576f57b0d4fb428a0514daba6c, type: 3}
+    m_HighlightedSprite: {fileID: -6787378935578363800, guid: f37bee6983183f34a91bf718240c7de7, type: 3}
     m_PressedSprite: {fileID: -6373792479334291178, guid: 3b7f9f576f57b0d4fb428a0514daba6c, type: 3}
     m_SelectedSprite: {fileID: -6373792479334291178, guid: 3b7f9f576f57b0d4fb428a0514daba6c, type: 3}
     m_DisabledSprite: {fileID: -6373792479334291178, guid: 3b7f9f576f57b0d4fb428a0514daba6c, type: 3}
@@ -1324,7 +1422,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -6787378935578363800, guid: f37bee6983183f34a91bf718240c7de7, type: 3}
+  m_Sprite: {fileID: -179004128829763584, guid: 73f78c8d00192554caef74c131b40fa2, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1996,7 +2094,7 @@ AudioSource:
   m_GameObject: {fileID: 1761130668}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 24300002, guid: a0f1ba02ee9fa7d40823206343b4181c, type: 2}
+  OutputAudioMixerGroup: {fileID: 24300002, guid: 86e308bf538dec24eae052e6e9abb9a2, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 8300000, guid: 5563ee4f91f1f774794b597c39917d18, type: 3}
   m_PlayOnAwake: 1
@@ -2132,7 +2230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d57a6fad8d26c649985b27b27f49576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VolumeControl
-  mainMixer: {fileID: 24100000, guid: a0f1ba02ee9fa7d40823206343b4181c, type: 2}
+  mainMixer: {fileID: 24100000, guid: 86e308bf538dec24eae052e6e9abb9a2, type: 2}
   volumeSlider: {fileID: 1934748111}
 --- !u!1 &1932974141
 GameObject:
@@ -2403,6 +2501,7 @@ RectTransform:
   - {fileID: 324601008}
   - {fileID: 2053732667}
   - {fileID: 1693622367}
+  - {fileID: 1476502401}
   m_Father: {fileID: 1280968567}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
