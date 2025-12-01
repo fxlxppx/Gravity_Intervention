@@ -27,8 +27,6 @@ public class UIButtonObjectiveDisplay : MonoBehaviour
             Destroy(gameObject);
         else
             Instance = this;
-
-        HideObjective();
     }
 
     private void OnEnable()
@@ -41,6 +39,11 @@ public class UIButtonObjectiveDisplay : MonoBehaviour
     {
         ButtonSystem.OnButtonPressedCountChanged -= HandleButtonUpdate;
         CheckpointManager.OnPlayerRespawn -= ResetObjective;
+    }
+
+    private void Start()
+    {
+        HideObjective();
     }
 
     public void InitializeObjective(DoorColorEnum color, int required)
