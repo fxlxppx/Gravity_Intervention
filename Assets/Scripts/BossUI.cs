@@ -24,7 +24,7 @@ public class BossHealthDisplay : MonoBehaviour
 
     private void Start()
     {
-        currentHealth = maxHealth - 1;
+        currentHealth = maxHealth;
         UpdateSprite(currentHealth);
     }
 
@@ -43,7 +43,7 @@ public class BossHealthDisplay : MonoBehaviour
     public void ResetHealth(int max)
     {
         maxHealth = max;
-        currentHealth = maxHealth -1;
+        currentHealth = maxHealth;
         UpdateSprite(currentHealth);
     }
 
